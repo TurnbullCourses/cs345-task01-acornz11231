@@ -29,6 +29,7 @@ class BankAccountTest {
     }
 
     @Test
+<<<<<<< HEAD
     void isEmailValidTest(){      
         
         assertFalse(BankAccount.isEmailValid("")); // empty string
@@ -53,6 +54,15 @@ class BankAccountTest {
         assertTrue(BankAccount.isEmailValid("acb@xzy.com"));   // valid email address  
         assertTrue(BankAccount.isEmailValid("a.b_c@xyz.com"));
 
+=======
+    void isEmailValidTest(){
+        assertTrue(BankAccount.isEmailValid( "a@b.com"));   // valid email address
+        assertFalse( BankAccount.isEmailValid(""));         // empty string
+        assertFalse(BankAccount.isEmailValid("@b.com")); //just domain
+        assertFalse(BankAccount.isEmailValid("a@")); //no domain
+        assertFalse(BankAccount.isEmailValid("a@b..com")); //two periods
+        assertFalse(BankAccount.isEmailValid("a@@b.com"));  //two at signs
+>>>>>>> d2305264b5cfb59c335045d4afcd71da149e170d
     }
 
     @Test

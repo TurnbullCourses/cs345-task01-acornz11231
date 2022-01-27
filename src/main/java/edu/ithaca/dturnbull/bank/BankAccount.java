@@ -43,12 +43,24 @@ public class BankAccount {
         int atIndex = email.indexOf("@");
         int dotIndex = email.indexOf(".");
         int emailLength = email.length();
+        String emailNoP = email.replace(".","");
+        String emailNoAt = email.replace("@", "");
+
 
         if(atIndex == -1 || atIndex == 0 || atIndex == emailLength-1){
             return false;
         }
         
         else if(!(dotIndex > atIndex + 1)){
+            return false;
+        }
+
+        else if(emailLength - emailNoP.length() !=1){
+            return false;
+        }
+
+        
+        else if (emailLength - emailNoAt.length() != 1){
             return false;
         }
 
