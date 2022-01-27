@@ -28,8 +28,8 @@ class BankAccountTest {
         assertFalse( BankAccount.isEmailValid(""));         // empty string
         assertFalse(BankAccount.isEmailValid("@b.com")); //just domain
         assertFalse(BankAccount.isEmailValid("a@")); //no domain
-        assertFalse(BankAccount.isEmailValid("a@b..com")); //twoperiods
-        assertFalse(BankAccount.isEmailValid("a@@b.com")); 
+        assertFalse(BankAccount.isEmailValid("a@b..com")); //two periods
+        assertFalse(BankAccount.isEmailValid("a@@b.com"));  //two at signs
     }
 
     @Test
