@@ -65,4 +65,15 @@ class BankAccountTest {
         assertThrows(IllegalArgumentException.class, ()-> new BankAccount("", 100));
     }
 
+    @Test
+    void isAmountValidTest() {
+        assertTrue(BankAccount.isAmountValid(1));
+        assertTrue(BankAccount.isAmountValid(1.2));
+        assertTrue(BankAccount.isAmountValid(1.23));
+        assertFalse(BankAccount.isAmountValid(1.234));
+        assertFalse(BankAccount.isAmountValid(0)); // zero should be considered a negative in this case becuase you cannot add zero dollars to your bank account... you can I guess but its the same as adding nothing so zero should not be considered valid
+        assertFalse(BankAccount.isAmountValid(-1));
+        assertFalse(BankAccount.isAmountValid(-0.05));
+    }
+
 }
