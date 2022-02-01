@@ -12,20 +12,20 @@ class BankAccountTest {
 
         assertEquals(200, bankAccount.getBalance(), 0.001);
     }
-
+    
     @Test
     void withdrawTest() throws InsufficientFundsException{
-        BankAccount bankAccount = new BankAccount("a@b.com", 200);
+        BankAccount testAccount = new BankAccount("abc@xyz.com", 1000);
+        assertThrows(IllegalArgumentException.class, () -> testAccount.withdraw(0)); 
+        assertThrows(IllegalArgumentException.class, () -> testAccount.withdraw(1.234)); 
+
+        testAccount.withdraw(1);
+        assertEquals(999, testAccount.getBalance());
         
-        bankAccount.withdraw(0);
-        assertEquals(200, bankAccount.getBalance());
-        
-        bankAccount.withdraw(100);
-        
-        assertEquals(100, bankAccount.getBalance(), 0.001);
-        assertThrows(InsufficientFundsException.class, () -> bankAccount.withdraw(300));
-        
-        assertThrows(NegativeWithdrawalException.class, () -> bankAccount.withdraw(-1));
+        testAccount.withdraw(900);
+        assertEquals(99, testAccount.getBalance());
+
+        assertThrows(InsufficientFundsException.class, () -> testAccount.withdraw(100));
     }
 
     @Test
@@ -63,6 +63,10 @@ class BankAccountTest {
         assertEquals(200, bankAccount.getBalance(), 0.001);
         //check for exception thrown correctly
         assertThrows(IllegalArgumentException.class, ()-> new BankAccount("", 100));
+
+        assertThrows(IllegalArgumentException.class, ()-> new BankAccount("abc@xyzcom", -1));
+
+        assertThrows(IllegalArgumentException.class, ()-> new BankAccount("abc@xyzcom", 1.234));
     }
 
     @Test
@@ -71,7 +75,7 @@ class BankAccountTest {
         assertTrue(BankAccount.isAmountValid(1.2));
         assertTrue(BankAccount.isAmountValid(1.23));
         assertFalse(BankAccount.isAmountValid(1.234));
-        assertFalse(BankAccount.isAmountValid(0)); // zero should be considered a negative in this case becuase you cannot add zero dollars to your bank account... you can I guess but its the same as adding nothing so zero should not be considered valid
+        assertTrue(BankAccount.isAmountValid(0)); // zero should be considered a negative in this case becuase you cannot add zero dollars to your bank account... you can I guess but its the same as adding nothing so zero should not be considered valid
         assertFalse(BankAccount.isAmountValid(-1));
         assertFalse(BankAccount.isAmountValid(-0.05));
     }
