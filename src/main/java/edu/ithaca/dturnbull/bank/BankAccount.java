@@ -1,20 +1,23 @@
 package edu.ithaca.dturnbull.bank;
+
+import java.math.BigDecimal;
+
 public class BankAccount {
 
-    private static String email;
+    private String email;
     private double balance;
 
     /**
      * @throws IllegalArgumentException if email is invalid
      */
     public BankAccount(String email, double startingBalance){
-        if (isEmailValid(email)){
+        if (!isAmountValid(startingBalance)){
+            throw new IllegalArgumentException("Invalid starting balance");
+        } else if (!isEmailValid(email)){
+            throw new IllegalArgumentException("Invalid email");
+        } else {
             this.email = email;
             this.balance = startingBalance;
-
-        }
-        else {
-            throw new IllegalArgumentException("Email address: " + email + " is invalid, cannot create account");
         }
     }
 
@@ -22,49 +25,20 @@ public class BankAccount {
         return balance;
     }
 
-    public static String getEmail(){
+    public String getEmail(){
         return email;
-    }
-
-    public static String getPrefix(){
-        String email = BankAccount.getEmail();
-        String prefix="";
-        for(int i=0; i<email.length(); i++){
-            if(email.charAt(i) != '@'){
-                prefix = prefix + email.charAt(i);
-                i++;
-            }
-        }
-        return prefix;
-    }
-
-    public static String getDomain(){
-        String email = BankAccount.getEmail();
-        String domain="";
-        for(int i=0; i<email.length(); i++){
-            i++;
-            if(email.charAt(i-1) == '@'){
-                domain = domain + email.charAt(i);
-                i++;
-            }
-        }
-        return domain;
     }
 
     /**
      * @post reduces the balance by amount if amount is non-negative and smaller than balance
      */
     public void withdraw (double amount) throws InsufficientFundsException{
-        if(isAmountValid(amount)){ //if amount is valid
-            if (amount <= balance){
-                balance -= amount;
-            }
-            else {
-                throw new InsufficientFundsException("Not enough money");
-            }
-        }
-        else {
+        if (!isAmountValid(amount)){
             throw new IllegalArgumentException("Withdraw amount invalid");
+        } else if (amount > balance) {
+            throw new InsufficientFundsException("Not enough money");
+        } else {
+            balance -= amount;
         }
     }
 
@@ -77,75 +51,69 @@ public class BankAccount {
     }
 
     public void transfer(BankAccount account, double amount) throws InsufficientFundsException{
-        if (!isAmountValid(amount)){
-            throw new InsufficientFundsException("Not enough money");
-        } else {
-            this.withdraw(amount);
-            account.deposit(amount);
-        }
-    }
-
-    private static boolean isPrefixValid(){
-        String prefix = BankAccount.getPrefix();
-        if (prefix.indexOf('@') == -1 && prefix.indexOf('#') ==-1){ //if @ and # don't appear
-            if(prefix.indexOf('.') !=0 && prefix.indexOf('.') != (prefix.length()-1)){ //if a period doesn't start or end the prefix
-                if(prefix.indexOf('_') !=0 && prefix.indexOf('_') != (prefix.length()-1)){ //if a _ doesn't start or end the prefix
-                    if(prefix.indexOf('-') !=0 && prefix.indexOf('-') != (prefix.length()-1)){ //if a - doesn't start or end the prefix
-                        for(int i=0; i<prefix.length(); i++){
-                            if(prefix.charAt(i) =='.' && (prefix.charAt(i-1) =='.' || prefix.charAt(i+1) =='.')){ //if periods appear adjacent
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                } 
-            }
-        }
-        return false;
-    }
-
-    private static boolean isDomainValid(){
-        String domain = BankAccount.getDomain();
-        if (domain.indexOf('@') == -1 && domain.indexOf('#') ==-1){ //if @ and # don't appear
-            if (domain.indexOf('.') != -1){ //if there is at least one period
-                if(domain.indexOf('.') !=0 && domain.indexOf('.') != (domain.length()-1)){ //if a period doesn't start or end the domain
-                    if(domain.indexOf('_') !=0 && domain.indexOf('_') != (domain.length()-1)){ //if a _ doesn't start or end the domain
-                        if(domain.indexOf('-') !=0 && domain.indexOf('-') != (domain.length()-1)){ //if a - doesn't start or end the domain
-                            if(domain.charAt(domain.length()-1) != '.' && domain.charAt(domain.length()-1) != '.'){ //if a period doesn't appear in last 2 characters
-                                for(int i=0; i<domain.length(); i++){
-                                    if(domain.charAt(i) =='.' && (domain.charAt(i-1) =='.' || domain.charAt(i+1) =='.')){ //if periods appear adjacent
-                                        return false;
-                                    }
-                                }
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        //dont need to do any of the throwing in this method as it is already handled in widraw and deposit
+        this.withdraw(amount);
+        account.deposit(amount);
     }
 
     public static boolean isEmailValid(String email){
-        if(email.indexOf('@') != email.lastIndexOf('@')){ //if @ appears more than once
-            return false;
-        }
-        else if(isPrefixValid() && isDomainValid()){
-                return true;
+        char[] emailChars = email.toCharArray();
+        int atCount = 0;
+        int atIndex = 0;
+        int pCount = 0;
+        //confirm that email contains one @ and stores its index
+        for (int i = 0; i < emailChars.length; i++){
+            if (emailChars[i] == '@'){
+                atCount += 1;
+                atIndex = i;    
+                
             }
-        else{
+        }
+        if (atCount != 1 || atIndex == 0){
             return false;
         }
+
+        //checks prefix for concurrent .,_,- or .,_,- at the front or start and special characters(currently just #) 
+        for (int j = 0; j < atIndex; j++){
+            if ( (emailChars[j] == '_' || emailChars[j] == '-' || emailChars[j] == '.') && (emailChars[j+1] == '.' || emailChars[j+1] =='-' || emailChars[j+1] =='_' || emailChars[j+1] == '@')){
+                return false;
+            } else if ((j == 0 || (j+1) == atIndex) && (emailChars[j] == '_' || emailChars[j] == '-' || emailChars[j] == '.')){
+                return false;
+            } else if (emailChars[j] == '#'){ //ADD MORE
+                return false;
+            }
+        }
+
+        //checks domain for correct spacing around .   needs more 
+        for (int n=atIndex; n < emailChars.length; n++){
+            if (emailChars[n] == '.'){
+                pCount += 1;
+            } 
+            if (emailChars[n] == '.' && ( ( (n+3) > emailChars.length ) || ( n < (atIndex+2) ) ) || (emailChars[n-1] == '-') ){
+                return false;
+            }
+            if (emailChars[n] == '_'){
+                return false;
+            }
+
+            
+        }
+        if (pCount != 1){
+            return false;
+        }
+
+        return true;
     }
 
     public static boolean isAmountValid(double amount){
-        if(String.valueOf(amount) == (String.format("%.2f", amount))){ //if amount is two decimal places
-            if(amount<0){ //if amount is negative
-                return false;
-            }
+        String amountString = Double.toString(amount);
+        BigDecimal num = new BigDecimal(amountString);
+        if (amount < 0){
+            return false;
+        } else if (num.scale() > 2){
+            return false;
+        } else {
             return true;
         }
-        return false;
     }
 }   
