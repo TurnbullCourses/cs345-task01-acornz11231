@@ -69,27 +69,20 @@ public class BankAccount {
     }
 
     public void deposit(double amount) throws IllegalArgumentException{
-        if(isAmountValid(amount)){ //if amount is valid
-            if(amount==0){
-                throw new IllegalArgumentException("Cannot deposit zero");
-            }
-        }
-        else {
-            throw new IllegalArgumentException("Deposit amount invalid");
+        if (!isAmountValid(amount)){
+            throw new IllegalArgumentException("Deposite amount invalid");
+        }  else {
+            balance += amount;
         }
     }
 
-    public void transfer(String email, double amount) throws InsufficientFundsException{
-        if(isAmountValid(amount)){ //if amount is valid
-            if(isEmailValid(email)){
-                if(amount<= balance){
-                    balance-= amount;
-                }
-                throw new InsufficientFundsException("not enough money");
-            }
-            throw new IllegalArgumentException("Email invalid");
+    public void transfer(BankAccount account, double amount) throws InsufficientFundsException{
+        if (!isAmountValid(amount)){
+            throw new InsufficientFundsException("Not enough money");
+        } else {
+            this.withdraw(amount);
+            account.deposit(amount);
         }
-        throw new IllegalArgumentException("Transfer amount invalid");
     }
 
     private static boolean isPrefixValid(){
