@@ -12,22 +12,78 @@ class BankAccountTest {
 
         assertEquals(200, bankAccount.getBalance(), 0.001);
     }
-
+    
     @Test
     void withdrawTest() throws InsufficientFundsException{
-        BankAccount bankAccount = new BankAccount("a@b.com", 200);
-        bankAccount.withdraw(100);
+        BankAccount testAccount = new BankAccount("abc@xyz.com", 1000); 
+        assertThrows(IllegalArgumentException.class, () -> testAccount.withdraw(1.234)); 
 
-        assertEquals(100, bankAccount.getBalance(), 0.001);
-        assertThrows(InsufficientFundsException.class, () -> bankAccount.withdraw(300));
+        testAccount.withdraw(1);
+        assertEquals(999, testAccount.getBalance());
+        
+        testAccount.withdraw(900);
+        assertEquals(99, testAccount.getBalance());
+
+        assertThrows(InsufficientFundsException.class, () -> testAccount.withdraw(100));
     }
 
     @Test
-    void isEmailValidTest(){
-        assertTrue(BankAccount.isEmailValid( "a@b.com"));   // valid email address
-        assertFalse( BankAccount.isEmailValid(""));         // empty string
-
+    void depositTest()  throws InsufficientFundsException{
+        BankAccount bankAccount = new BankAccount("a@b.com", 200);
         
+        bankAccount.deposit(100); //deposit some money
+        assertEquals(300, bankAccount.getBalance());
+
+        assertThrows(IllegalArgumentException.class, ()->  bankAccount.deposit(100.001));  //should remain unchanged/not work
+
+        assertThrows(IllegalArgumentException.class, ()->  bankAccount.deposit(-1));
+    }
+
+    @Test
+    void transferTest() throws InsufficientFundsException{
+        BankAccount testAccount1 = new BankAccount("abc@xyx.com", 200);
+        BankAccount testAccount2 = new BankAccount("xyz@abc.com", 0);
+
+        testAccount1.transfer(testAccount2, 50);
+        assertEquals(150, testAccount1.getBalance());
+        assertEquals(50, testAccount2.getBalance());
+
+        assertThrows(InsufficientFundsException.class, ()-> testAccount1.transfer(testAccount2, 151));
+
+        assertThrows(IllegalArgumentException.class, ()-> testAccount1.transfer(testAccount2, -1));
+
+        assertThrows(IllegalArgumentException.class, ()-> testAccount1.transfer(testAccount2, 1.234));
+        
+
+    }
+
+
+
+    @Test
+    void isEmailValidTest(){      
+        
+        assertFalse(BankAccount.isEmailValid("")); // empty string
+        assertFalse(BankAccount.isEmailValid("abcxyz.com")); // no @
+
+        //prefix tests
+        assertFalse(BankAccount.isEmailValid("@xyz.com")); //no prefix
+        assertFalse(BankAccount.isEmailValid("abc-@xyz.com")); //non-letter/number direcly before @
+        assertFalse(BankAccount.isEmailValid("-abc@xyz.com")); //non-letter/number first char
+        assertFalse(BankAccount.isEmailValid("a#c@xyz.com")); //invalid char... there are a number of invalid chars which one to test? multiple?
+        assertFalse(BankAccount.isEmailValid("a--cb@xyz.com")); //dash followed by non-letter/number... same issue as above also need testing for ..__,.-,._ etc
+
+        //domain tests
+        assertFalse(BankAccount.isEmailValid("abc@")); //no domain
+        assertFalse(BankAccount.isEmailValid("abc@xyz.c")); //last portion too short
+        assertFalse(BankAccount.isEmailValid("abc@x_yz.com")); // contains invalid char, _ is valid in prefix but not in domain. 
+        assertFalse(BankAccount.isEmailValid("abc@xyz")); //no last portion
+        assertFalse(BankAccount.isEmailValid("abc@.com")); //no domain name
+        assertFalse(BankAccount.isEmailValid("abc@xyz-.com")); //non-letter/number ending domain name
+
+
+        assertTrue(BankAccount.isEmailValid("acb@xzy.com"));   // valid email address  
+        assertTrue(BankAccount.isEmailValid("a.b_c@xyz.com"));
+
     }
 
     @Test
@@ -38,6 +94,21 @@ class BankAccountTest {
         assertEquals(200, bankAccount.getBalance(), 0.001);
         //check for exception thrown correctly
         assertThrows(IllegalArgumentException.class, ()-> new BankAccount("", 100));
+
+        assertThrows(IllegalArgumentException.class, ()-> new BankAccount("abc@xyzcom", -1));
+
+        assertThrows(IllegalArgumentException.class, ()-> new BankAccount("abc@xyzcom", 1.234));
+    }
+
+    @Test
+    void isAmountValidTest() {
+        assertTrue(BankAccount.isAmountValid(1));
+        assertTrue(BankAccount.isAmountValid(1.2));
+        assertTrue(BankAccount.isAmountValid(1.23));
+        assertFalse(BankAccount.isAmountValid(1.234));
+        assertTrue(BankAccount.isAmountValid(0)); // zero should be considered a negative in this case becuase you cannot add zero dollars to your bank account... you can I guess but its the same as adding nothing so zero should not be considered valid
+        assertFalse(BankAccount.isAmountValid(-1));
+        assertFalse(BankAccount.isAmountValid(-0.05));
     }
 
 }
